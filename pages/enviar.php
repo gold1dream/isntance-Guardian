@@ -21,7 +21,7 @@ $dados = [
         <h3>Nova mensagem recebida pelo CyberGuardian</h3>
         <p><strong>Nome:</strong> {$nomeUsuario}</p>
         <p><strong>E-mail:</strong> {$emailUsuario}</p>
-        <p><strong>Mensagem:</strong><br>{$mensagemUsuario}</p>
+        <p><strong>Mensagem:essa mensagem foi enviada com PHP...quem diria</strong><br>{$mensagemUsuario}</p>
     "
 ];
 
