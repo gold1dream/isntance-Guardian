@@ -1,55 +1,47 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
 
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-$caminhoEnv = __DIR__ . '/../';
-if (file_exists($caminhoEnv . '.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable($caminhoEnv);
-    $dotenv->safeLoad();
-}
-
+$nomeUsuario = htmlspecialchars($_POST['nome'] ?? 'Anônimo');
 $emailUsuario = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
+$mensagemUsuario = htmlspecialchars($_POST['mensagem'] ?? '');
 
-if (!filter_var($emailUsuario, FILTER_VALIDATE_EMAIL)){
+if (!$emailUsuario) {
     die("E-mail inválido! Tente voltar e preencher corretamente.");
 }
 
-$nomeUsuario = htmlspecialchars($_POST['nome'] ?? 'Anônimo');
-$mensagemUsuario = htmlspecialchars($_POST['mensagem'] ?? '');
 
-$mail = new PHPMailer(true);
+$apiKey = getenv('RESEND_API_KEY');
 
-try {
-    // CORRIGIDO: Removido o cifrão extra ($) de isSMTP
-    $mail->isSMTP();
-    
-    $mail->Host       = gethostbyname('smtp.gmail.com');
-    $mail->SMTPAuth   = true;
 
-    // Ativa o debug correto para vermos a resposta do Google no terminal
-    $mail->SMTPDebug  = SMTP::DEBUG_SERVER;
+$dados = [
+  
+    'from' => 'onboarding@resend.dev',
+    'to' => ['neemiaslauriano8@gmail.com'], 
+    'subject' => "Novo contato de: $nomeUsuario ($emailUsuario)",
+    'html' => "
+        <h3>Nova mensagem recebida pelo CyberGuardian</h3>
+        <p><strong>Nome:</strong> {$nomeUsuario}</p>
+        <p><strong>E-mail:</strong> {$emailUsuario}</p>
+        <p><strong>Mensagem:</strong><br>{$mensagemUsuario}</p>
+    "
+];
 
-    $mail->Username   = $_ENV['SMTP_USER'];
-    $mail->Password   = $_ENV['SMTP_PASS'];
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+$ch = curl_init('https://api.resend.com/emails');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $apiKey,
+    'Content-Type: application/json'
+]);
 
-    $mail->CharSet = 'UTF-8';
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-    $mail->setFrom($_ENV['SMTP_USER'], 'Cyberguardian');
-    $mail->addAddress($emailUsuario, $nomeUsuario);
-    $mail->addReplyTo($emailUsuario, $nomeUsuario);
 
-    $mail->isHTML(true);
-    $mail->Subject     = 'Mensagem de test recebida??';
-    $mail->Body        = 'Olá! é um e-mail por PHP pois é... quem diria';
-
-    $mail->send();
-    echo 'E-mail enviado com sucesso!';
-} catch (Exception $e) {
-    echo "Erro ao enviar o e-mail: {$mail->ErrorInfo}";
+if ($httpCode === 200 || $httpCode === 201) {
+    echo "E-mail enviado com sucesso!";
+} else {
+    echo "Erro ao enviar o e-mail: " . $response;
 }
 ?>
