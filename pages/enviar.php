@@ -13,17 +13,19 @@ $apiKey = getenv('RESEND_API_KEY');
 
 
 $dados = [
-  
     'from' => 'onboarding@resend.dev',
-    'to' => ['neemiaslauriano8@gmail.com'], 
-    'subject' => "Novo contato de: $nomeUsuario ($emailUsuario)",
+ 
+    'to' => [$emailUsuario], 
+    'subject' => "Recebemos a sua mensagem, $nomeUsuario!",
     'html' => "
-        <h3>Nova mensagem recebida pelo CyberGuardian</h3>
-        <p><strong>Nome:</strong> {$nomeUsuario}</p>
-        <p><strong>E-mail:</strong> {$emailUsuario}</p>
-        <p><strong>Mensagem:essa mensagem foi enviada com PHP...quem diria</strong><br>{$mensagemUsuario}</p>
+        <h3>Olá, {$nomeUsuario}!</h3>
+        <p>Recebemos a sua mensagem através do CyberGuardian e em breve entraremos em contato.</p>
+        <hr>
+        <p><strong>Sua mensagem enviada:</strong></p>
+        <p>{$mensagemUsuario}</p>
     "
 ];
+
 
 $ch = curl_init('https://api.resend.com/emails');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -40,7 +42,7 @@ curl_close($ch);
 
 
 if ($httpCode === 200 || $httpCode === 201) {
-    echo "E-mail enviado com sucesso!";
+    echo "E-mail de confirmação enviado com sucesso!";
 } else {
     echo "Erro ao enviar o e-mail: " . $response;
 }
