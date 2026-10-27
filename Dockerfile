@@ -17,7 +17,7 @@ COPY . .
 # Instala as dependências via Composer se houver composer.json
 RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
 
-EXPOSE 8080
+EXPOSE 10000
 
-# Sobe o servidor embutido do PHP apontando para a pasta pages
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "pages"]
+# Sobe o servidor embutido do PHP usando a porta dinâmica do Render (ou 10000 como padrão)
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-10000} -t pages"]
