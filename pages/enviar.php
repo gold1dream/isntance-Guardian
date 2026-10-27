@@ -26,7 +26,7 @@ try {
     // CORRIGIDO: Removido o cifrão extra ($) de isSMTP
     $mail->isSMTP();
     
-    $mail->Host       = 'smtp.gmail.com';
+    $mail->Host       = gethostbyname('smtp.gmail.com');
     $mail->SMTPAuth   = true;
 
     // Ativa o debug correto para vermos a resposta do Google no terminal
