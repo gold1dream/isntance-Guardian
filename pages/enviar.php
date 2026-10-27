@@ -5,8 +5,11 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+$caminhoEnv = __DIR__ . '/../';
+if (file_exists($caminhoEnv . '.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable($caminhoEnv);
+    $dotenv->safeLoad();
+}
 
 $emailUsuario = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
 
